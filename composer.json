@@ -1,0 +1,21 @@
+{
+    "name": "cmink/bpjs",
+    "description": "Bridging BPJS V2",
+    "type": "package",
+    "authors": [
+        {
+            "name": "cmiNk Alone",
+            "email": "cmink.alone@gmail.com"
+        }
+    ],
+    "license": "mit",
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "cmiNk\\Bpjs\\": "src/"
+        }
+    },
+    "require": {
+        "guzzlehttp/guzzle": "~6.0"
+    }
+}

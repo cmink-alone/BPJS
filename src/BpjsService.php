@@ -50,6 +50,11 @@ class BpjsService{
      */
     private $service_name;
 
+    /**
+     * @var string
+     */
+    private $user_key;
+
     public function __construct($configurations)
     {
         $this->clients = new Client([
@@ -71,7 +76,8 @@ class BpjsService{
         $this->headers = [
             'X-cons-id' => $this->cons_id,
             'X-Timestamp' => $this->timestamp,
-            'X-Signature' => $this->signature
+            'X-Signature' => $this->signature,
+            'user_key' => $this->user_key
         ];
         return $this;
     }

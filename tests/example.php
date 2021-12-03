@@ -6,9 +6,9 @@ require_once __DIR__.'/../vendor/autoload.php';
 $vclaim_conf = [
     'cons_id' => '123456',
     'secret_key' => '123456',
-    'user_key' => 'userkey untuk mengakses ws BPJS',
     'base_url' => 'url webservice BPJS',
-    'service_name' => 'vclaim-rest'
+    'service_name' => 'vclaim-rest',
+    'user_key' => 'userkey untuk mengakses ws BPJS'
 ];
 
 // use Referensi service

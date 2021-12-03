@@ -396,4 +396,87 @@ class Bridging extends BpjsService
         return json_decode($response, true);
     }
 
+    /** Service Referensi antrian */
+    public function refpoli()
+    {
+        $header = [
+            'Content-Type'=>'application/json'
+        ];
+        $response = $this->get('ref/poli');
+        return json_decode($response, true);
+    }
+
+    public function refdokter()
+    {
+        $header = [
+            'Content-Type'=>'application/json'
+        ];
+        $response = $this->get('ref/dokter');
+        return json_decode($response, true);
+    }
+
+    /** Service Referensi Get Jadwal */
+    public function getJadwal($kdpoli, $tanggal)
+    {
+        $response = $this->get('jadwaldokter/kodepoli/'.$kdpoli.'/tanggal/'.$tanggal);
+        return json_decode($response, true);
+    }
+    public function update($data = [])
+    {
+        $header = [
+            'Content-Type'=>'application/json'
+        ];
+        $response = $this->post('jadwaldokter/updatejadwaldokter', $data, $header);
+        return json_decode($response, true);
+    }
+
+    /** Service Referensi Antrian */
+    public function getListTask($data = [])
+    {
+        $header = [
+            'Content-Type'=>'application/json'
+        ];
+        $response = $this->post('antrean/getlisttask',$data);
+        return json_decode($response, true);
+    }
+
+    public function addAntrean($data = [])
+    {
+        $header = [
+            'Content-Type'=>'application/json'
+        ];
+        $response = $this->post('antrean/add', $data, $header);
+        return json_decode($response, true);
+    }
+
+    public function cancelAntrean($data = [])
+    {
+        $header = [
+            'Content-Type'=>'application/json'
+        ];
+        $response = $this->post('antrean/batal', $data, $header);
+        return json_decode($response, true);
+    }
+
+    public function updateWaktu($data = [])
+    {
+        $header = [
+            'Content-Type'=>'application/json'
+        ];
+        $response = $this->post('antrean/updatewaktu', $data, $header);
+        return json_decode($response, true);
+    }
+
+    public function dashboardTgl($tanggal, $waktu)
+    {
+        $response = $this->get('dashboard/waktutunggu/tanggal/'.$tanggal.'/waktu/'.$waktu);
+        return json_decode($response, true);
+    }
+
+    public function dashboardBln($bulan, $tahun, $waktu)
+    {
+        $response = $this->get('dashboard/waktutunggu/bulan/'.$bulan.'/tahun/' .$tahun. '/waktu/'.$waktu);
+        return json_decode($response, true);
+    }
+
 }

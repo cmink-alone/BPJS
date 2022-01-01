@@ -162,7 +162,7 @@ class Bridging extends BpjsService
     }
     public function updateTglPlg($data = [])
     {
-        $response = $this->put('Sep/2.0/updtglplg', $data);
+        $response = $this->put('SEP/2.0/updtglplg', $data);
         return json_decode($response, true);
     }
     public function inacbgSEP($nosep)

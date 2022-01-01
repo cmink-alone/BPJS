@@ -110,7 +110,8 @@ class BpjsService{
                 ]
             )->getBody()->getContents();
         } catch (\Exception $e) {
-            $response = $e->getResponse()->getBody();
+//            $response = $e->getResponse()->getBody();
+            $response = false;
         }
         return $response;
     }

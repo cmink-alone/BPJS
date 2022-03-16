@@ -1,7 +1,7 @@
 # BPJS Kesehatan Indonesia
 PHP package to access BPJS Kesehatan API :ambulance:.
 This package is a wrapper of BPJS VClaim Web Service
-https://dvlp.bpjs-kesehatan.go.id/VClaim-Katalog
+https://dvlp.bpjs-kesehatan.go.id:8888/trust-mark/portal.html
 
 Dibuat untuk mempermudah tanpa menggunakan metode lama dari PHP_CURL,
 pengembangan dari BPJS Wrapper nsulistiawan (https://github.com/nsulistiyawan/bpjs)

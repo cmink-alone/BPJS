@@ -3,7 +3,8 @@ namespace cmiNk\Bpjs;
 
 use GuzzleHttp\Client;
 
-class BpjsService{
+class BpjsService
+{
 
     /**
      * Guzzle HTTP Client object
@@ -43,17 +44,18 @@ class BpjsService{
     /**
      * @var string
      */
+    private $user_key;
+
+    /**
+     * @var string
+     */
     private $base_url;
 
     /**
      * @var string
      */
     private $service_name;
-
-    /**
-     * @var string
-     */
-    private $user_key;
+    private $timeout = 0;
 
     public function __construct($configurations)
     {
@@ -61,7 +63,7 @@ class BpjsService{
             'verify' => false
         ]);
 
-        foreach ($configurations as $key => $val){
+        foreach ($configurations as $key => $val) {
             if (property_exists($this, $key)) {
                 $this->$key = $val;
             }
@@ -84,8 +86,8 @@ class BpjsService{
 
     protected function setTimestamp()
     {
-        date_default_timezone_set('UTC');
-        $this->timestamp = strval(time() - strtotime('1970-01-01 00:00:00'));
+        $dateTime = new \DateTime('now', new \DateTimeZone('UTC'));
+        $this->timestamp = (string)$dateTime->getTimestamp();
         return $this;
     }
 
@@ -98,80 +100,93 @@ class BpjsService{
         return $this;
     }
 
+    private function _getDecryptionKey()
+    {
+        return $this->cons_id . $this->secret_key . $this->timestamp;
+    }
+
+    // returns response object or false
+    private function _request($method, $feature, $data = [], $headers = [])
+    {
+        if (!in_array($method, ['GET', 'POST', 'PUT', 'DELETE']))
+            return false;
+
+        if (in_array($method, ['POST', 'PUT', 'DELETE']))
+            $this->headers['Content-Type'] = 'application/x-www-form-urlencoded';
+
+        if (!empty($headers))
+            $this->headers = array_merge($this->headers, $headers);
+
+        $opts = ['headers' => $this->headers, 'timeout' => $this->timeout];
+
+        if (!empty($data))
+            $opts['json'] = $data;
+
+        try {
+            $response = json_decode(
+                $this->clients->request(
+                    $method,
+                    $this->base_url . '/' . $this->service_name . '/' . $feature,
+                    $opts
+                )->getBody()->getContents(),
+                true
+            );
+            //        } catch (\GuzzleHttp\Exception\RequestException $e) {
+        } catch (\Exception $e) {
+            if ($e->getCode() == 0) {
+                $handlerContext = $e->getHandlerContext();
+                $response = [
+                    'metaData' => [
+                        'code' => $handlerContext['errno'],
+                        'message' => $handlerContext['error']
+                    ]
+                ];
+            } else {
+                $response = [
+                    'metaData' => [
+                        'code' => $e->getCode(),
+                        'message' => $e->getMessage()
+                    ]
+                ];
+            }
+        }
+
+        if ($response['metaData']['code'] ?? '' == '200' and !empty($response['response']) and is_string($response['response']))
+            $response['response'] = json_decode($this->_decompress($response['response']), true);
+        return $response;
+    }
+
+    private function _decompress($txt)
+    {
+        $key  = $this->_getDecryptionKey();
+        $hash = hex2bin(hash('sha256', $key));
+        $iv   = substr($hash, 0, 16);
+
+
+        $tmp  = openssl_decrypt(base64_decode($txt), 'AES-256-CBC', $hash, OPENSSL_RAW_DATA, $iv);
+        if ($tmp === false) return $txt;
+
+        return LZString::decompressFromEncodedURIComponent($tmp);
+    }
+
     protected function get($feature)
     {
-        $this->headers['Content-Type'] = 'application/json; charset=utf-8';
-        try {
-            $response = $this->clients->request(
-                'GET',
-                $this->base_url . '/' . $this->service_name . '/' . $feature,
-                [
-                    'headers' => $this->headers
-                ]
-            )->getBody()->getContents();
-        } catch (\Exception $e) {
-//            $response = $e->getResponse()->getBody();
-            $response = false;
-        }
-        return $response;
+        return $this->_request('GET', $feature);
     }
 
     protected function post($feature, $data = [], $headers = [])
     {
-        $this->headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        if(!empty($headers)){
-            $this->headers = array_merge($this->headers,$headers);
-        }
-        try {
-            $response = $this->clients->request(
-                'POST',
-                $this->base_url . '/' . $this->service_name . '/' . $feature,
-                [
-                    'headers' => $this->headers,
-                    'json' => $data,
-                ]
-            )->getBody()->getContents();
-        } catch (\Exception $e) {
-            $response = $e->getResponse()->getBody();
-        }
-        return $response;
+        return $this->_request('POST', $feature, $data, $headers);
     }
 
     protected function put($feature, $data = [])
     {
-        $this->headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        try {
-            $response = $this->clients->request(
-                'PUT',
-                $this->base_url . '/' . $this->service_name . '/' . $feature,
-                [
-                    'headers' => $this->headers,
-                    'json' => $data,
-                ]
-            )->getBody()->getContents();
-        } catch (\Exception $e) {
-            $response = $e->getResponse()->getBody();
-        }
-        return $response;
+        return $this->_request('PUT', $feature, $data);
     }
-
 
     protected function delete($feature, $data = [])
     {
-        $this->headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        try {
-            $response = $this->clients->request(
-                'DELETE',
-                $this->base_url . '/' . $this->service_name . '/' . $feature,
-                [
-                    'headers' => $this->headers,
-                    'json' => $data,
-                ]
-            )->getBody()->getContents();
-        } catch (\Exception $e) {
-            $response = $e->getResponse()->getBody();
-        }
-        return $response;
+        return $this->_request('DELETE', $feature, $data);
     }
 
 }
